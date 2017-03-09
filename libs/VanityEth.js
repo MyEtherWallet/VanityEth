@@ -6,7 +6,7 @@ var ERRORS = {
 var getRandomWallet = function() {
     var randbytes = crypto.randomBytes(32);
     var address = '0x' + ethUtils.privateToAddress(randbytes).toString('hex');
-    return { address: address, privKey: '0x' + randbytes.toString('hex') }
+    return { address: address, privKey: randbytes.toString('hex') }
 }
 var isValidHex = function(hex) {
     if (!hex.length) return true;
