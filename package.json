@@ -1,0 +1,31 @@
+{
+    "name": "vanity-eth",
+    "version": "1.0.0",
+    "description": "ethereum vanity address generator",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MyEtherWallet/VanityEth.git"
+    },
+    "keywords": [
+        "vanity",
+        "ethereum",
+        "address"
+    ],
+    "author": "kvhnuke",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/MyEtherWallet/VanityEth/issues"
+    },
+    "bin": {
+        "vanityeth": "index.js"
+    },
+    "homepage": "https://github.com/MyEtherWallet/VanityEth#readme",
+    "dependencies": {
+        "ethereumjs-util": "^5.1.1",
+        "yargs": "^7.0.1"
+    }
+}
