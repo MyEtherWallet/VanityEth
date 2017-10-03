@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 var VanityEth = require('./libs/VanityEth');
+const ora = require('ora');
 var cluster = require('cluster')
 var numCPUs = require('os').cpus().length
 var argv = require('yargs')
@@ -36,13 +37,17 @@ if (cluster.isMaster) {
         log: argv.log ? true : false,
         logFname: argv.log ? 'VanityEth-log-' + Date.now() + '.txt' : ''
     }
-    if (!VanityEth.isValidHex(args.input)) throw new Error(VanityEth.ERRORS.invalidHex);
+    if (!VanityEth.isValidHex(args.input)) {
+        console.error(args.input + ' is not valid hexadecimal');
+        process.exit(1);
+    }
     if (args.log) {
         var fs = require('fs');
-        console.log(args.logFname);
+        console.log('logging into' + args.logFname);
         var logStream = fs.createWriteStream(args.logFname, { 'flags': 'a' });
     }
     var walletsFound = 0;
+    const spinner = ora('generating vanity address 1/' + args.numWallets).start();
     for (var i = 0; i < numCPUs; i++) {
         const worker_env = {
             input: args.input,
@@ -51,12 +56,14 @@ if (cluster.isMaster) {
         }
         proc = cluster.fork(worker_env);
         proc.on('message', function(message) {
-            console.log(message);
+            spinner.succeed(JSON.stringify(message));
             if (args.log) logStream.write(JSON.stringify(message) + "\n");
             walletsFound++;
             if (walletsFound >= args.numWallets) {
                 cleanup();
             }
+            spinner.text ='generating vanity address ' + (walletsFound + 1)  +'/' + args.numWallets;
+            spinner.start();
         });
     }
 
