@@ -48,6 +48,14 @@ help me
 $ vanityeth -h
 ```
 
+### Running Locally
+To run from source:
+```sh
+git clone git@github.com:MyEtherWallet/VanityEth.git
+cd VanityEth
+npm install
+```
+
 License
 ----
 
