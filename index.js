@@ -24,9 +24,6 @@ var argv = require('yargs')
     .alias('l', 'log')
     .boolean('l')
     .describe('l', 'log output to file')
-    .alias('d', 'cc')
-    .string('d')
-    .describe('d', 'reverse contract')
     .help('h')
     .alias('h', 'help')
     .epilog('copyright 2017')
@@ -38,14 +35,7 @@ if (cluster.isMaster) {
         numWallets: argv.count ? argv.count : 1,
         isContract: argv.contract ? true : false,
         log: argv.log ? true : false,
-        cc: argv.cc,
         logFname: argv.log ? 'VanityEth-log-' + Date.now() + '.txt' : ''
-    }
-    console.log(args.cc);
-    console.log('tf');
-    if (args.cc) {
-        console.log(VanityEth.getDeterministicContractAddress(argv.cc));
-        process.exit(0);
     }
     if (!VanityEth.isValidHex(args.input)) {
         console.error(args.input + ' is not valid hexadecimal');
