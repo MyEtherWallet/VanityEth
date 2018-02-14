@@ -17,7 +17,7 @@ var isValidHex = function(hex) {
 var isValidVanityWallet = function(wallet, input, isChecksum, isContract) {
     var _add = wallet.address;
     if (isContract) {
-        var _contractAdd = getDeteministicContractAddress(_add);
+        var _contractAdd = getDeterministicContractAddress(_add);
         _contractAdd = isChecksum ? ethUtils.toChecksumAddress(_contractAdd) : _contractAdd;
         return _contractAdd.substr(2, input.length) == input
     }
@@ -32,11 +32,12 @@ var getVanityWallet = function(input = '', isChecksum = false, isContract = fals
     if (isChecksum) _wallet.address = ethUtils.toChecksumAddress(_wallet.address);
     return _wallet;
 }
-var getDeteministicContractAddress = function(address) {
+var getDeterministicContractAddress = function(address) {
     return '0x' + ethUtils.sha3(ethUtils.rlp.encode([address, 0])).slice(12).toString('hex');
 }
 module.exports = {
     getVanityWallet: getVanityWallet,
     isValidHex: isValidHex,
+    getDeterministicContractAddress: getDeterministicContractAddress,
     ERRORS: ERRORS
 }
