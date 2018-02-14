@@ -54,6 +54,7 @@ To run from source:
 git clone git@github.com:MyEtherWallet/VanityEth.git
 cd VanityEth
 npm install
+./index.js
 ```
 
 License
