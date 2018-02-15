@@ -19,7 +19,6 @@ var isValidVanityWallet = function(wallet, input, isChecksum, isContract) {
     if (isContract) {
         var _contractAdd = getDeterministicContractAddress(_add);
         _contractAdd = isChecksum ? ethUtils.toChecksumAddress(_contractAdd) : _contractAdd;
-        wallet.contract = _contractAdd;
         return _contractAdd.substr(2, input.length) == input
     }
     _add = isChecksum ? ethUtils.toChecksumAddress(_add) : _add;
@@ -39,5 +38,6 @@ var getDeterministicContractAddress = function(address) {
 module.exports = {
     getVanityWallet: getVanityWallet,
     isValidHex: isValidHex,
+    getDeterministicContractAddress: getDeterministicContractAddress,
     ERRORS: ERRORS
 }
