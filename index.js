@@ -43,7 +43,7 @@ if (cluster.isMaster) {
     }
     if (args.log) {
         var fs = require('fs');
-        console.log('logging into' + args.logFname);
+        console.log('logging into ' + args.logFname);
         var logStream = fs.createWriteStream(args.logFname, { 'flags': 'a' });
     }
     var walletsFound = 0;
