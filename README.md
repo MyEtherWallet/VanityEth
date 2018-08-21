@@ -47,8 +47,6 @@ help me
 ```sh
 $ vanityeth -h
 ```
-
-
 ### Docker usage
 
 Get the image
@@ -57,7 +55,7 @@ Get the image
 $ docker build -t vanityeth .
 
 # or download image
-docker pull marchand/vanityeth
+docker pull myetherwallet/vanityeth
 ```
 
 Usage
@@ -68,6 +66,14 @@ $ docker run -it vanityeth
 $ docker run -it vanityeth -i deadbeef
 ```
 
+### Running Locally
+To run from source:
+```sh
+git clone git@github.com:MyEtherWallet/VanityEth.git
+cd VanityEth
+npm install
+./index.js
+```
 
 License
 ----

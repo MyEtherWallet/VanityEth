@@ -7,7 +7,7 @@ var numCPUs = require('os').cpus().length
 var argv = require('yargs')
     .usage('Usage: $0 <command> [options]')
     .example('$0 -checksum -i B00B5', 'get a wallet where address matches B00B5 in checksum format')
-    .example('$0 -contract -i ABC', 'get a wallet where 0 nonce contract address matches the vanity')
+    .example('$0 --contract -i ABC', 'get a wallet where 0 nonce contract address matches the vanity')
     .example('$0 -n 25 -i ABC', 'get 25 vanity wallets')
     .example('$0 -n 1000', 'get 1000 random wallets')
     .alias('i', 'input')
@@ -43,7 +43,7 @@ if (cluster.isMaster) {
     }
     if (args.log) {
         var fs = require('fs');
-        console.log('logging into' + args.logFname);
+        console.log('logging into ' + args.logFname);
         var logStream = fs.createWriteStream(args.logFname, { 'flags': 'a' });
     }
     var walletsFound = 0;
