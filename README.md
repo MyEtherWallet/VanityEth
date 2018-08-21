@@ -63,7 +63,7 @@ Usage
 $ docker run -it vanityeth
 
 # Pass additional arguments
-$ docker run -it vanityeth -i deadbeef
+$ docker run -it myetherwallet/vanityeth -i deadbeef
 ```
 
 ### Running Locally
