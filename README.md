@@ -47,6 +47,24 @@ help me
 ```sh
 $ vanityeth -h
 ```
+### Docker usage
+
+Get the image
+```sh
+# Build image locally after cloning repository
+$ docker build -t vanityeth .
+
+# or download image
+docker pull myetherwallet/vanityeth
+```
+
+Usage
+```
+$ docker run -it vanityeth
+
+# Pass additional arguments
+$ docker run -it vanityeth -i deadbeef
+```
 
 ### Running Locally
 To run from source:
