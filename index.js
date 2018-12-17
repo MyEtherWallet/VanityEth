@@ -6,8 +6,9 @@ var cluster = require('cluster')
 var numCPUs = require('os').cpus().length
 var argv = require('yargs')
     .usage('Usage: $0 <command> [options]')
-    .example('$0 -checksum -i B00B5', 'get a wallet where address matches B00B5 in checksum format')
+    .example('$0 --checksum -i B00B5', 'get a wallet where address matches B00B5 in checksum format')
     .example('$0 --contract -i ABC', 'get a wallet where 0 nonce contract address matches the vanity')
+    .example('$0 --deployer -i ABC', 'get a wallet where 0 nonce contract of 0 nonce contract address matches the vanity')
     .example('$0 -n 25 -i ABC', 'get 25 vanity wallets')
     .example('$0 -n 1000', 'get 1000 random wallets')
     .alias('i', 'input')
@@ -21,6 +22,8 @@ var argv = require('yargs')
     .describe('n', 'number of wallets')
     .boolean('contract')
     .describe('contract', 'contract address for contract deployment')
+    .boolean('deployer')
+    .describe('deployer', 'contract address for contract deployment')
     .alias('l', 'log')
     .boolean('l')
     .describe('l', 'log output to file')
@@ -34,6 +37,7 @@ if (cluster.isMaster) {
         isChecksum: argv.checksum ? true : false,
         numWallets: argv.count ? argv.count : 1,
         isContract: argv.contract ? true : false,
+        isDeployer: argv.deployer ? true : false,
         log: argv.log ? true : false,
         logFname: argv.log ? 'VanityEth-log-' + Date.now() + '.txt' : ''
     }
@@ -52,7 +56,8 @@ if (cluster.isMaster) {
         const worker_env = {
             input: args.input,
             isChecksum: args.isChecksum,
-            isContract: args.isContract
+            isContract: args.isContract,
+            isDeployer: args.isDeployer
         }
         proc = cluster.fork(worker_env);
         proc.on('message', function(message) {
@@ -70,7 +75,7 @@ if (cluster.isMaster) {
 } else {
     const worker_env = process.env;
     while (true) {
-        process.send(VanityEth.getVanityWallet(worker_env.input, worker_env.isChecksum == 'true', worker_env.isContract == 'true'))
+        process.send(VanityEth.getVanityWallet(worker_env.input, worker_env.isChecksum == 'true', worker_env.isContract == 'true', worker_env.isDeployer == 'true'))
     }
 }
 process.stdin.resume();
