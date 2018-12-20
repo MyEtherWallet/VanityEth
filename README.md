@@ -13,7 +13,7 @@ Nodejs based tool to generate vanity ethereum addresses
 ### Installation
 ```sh
 $ npm install -g vanity-eth
-$ vanityeth -i b00b5
+$ vanityeth -i deadbeef
 ```
 ### Examples
 
@@ -27,17 +27,17 @@ generate 10 ethereum addresses:
 $ vanityeth -n 10
 ```
 
-generate 10 ethereum addresses with b00b5 as starting characters:
+generate 10 ethereum addresses with deadbeef as starting characters:
 ```sh
-$ vanityeth -n 10 -i b00b5
+$ vanityeth -n 10 -i deadbeef
 ```
-generate 10 ethereum addresses with B00B5 as the checksum address (case sensitive):
+generate 10 ethereum addresses with DEADBEEF as the checksum address (case sensitive):
 ```sh
-$ vanityeth -n 10 -i B00B5 -c
+$ vanityeth -n 10 -i DEADBEEF -c
 ```
 generate ethereum address with vanity contract address:
 ```sh
-$ vanityeth -i b00b5 --contract
+$ vanityeth -i deadbeef --contract
 ```
 log to file
 ```sh
