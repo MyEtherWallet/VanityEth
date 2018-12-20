@@ -25,11 +25,14 @@ var isValidVanityWallet = function(wallet, input, isChecksum, isContract) {
     _add = isChecksum ? ethUtils.toChecksumAddress(_add) : _add;
     return _add.substr(2, input.length) == input;
 }
-var getVanityWallet = function(input = '', isChecksum = false, isContract = false) {
+var getVanityWallet = function(input = '', isChecksum = false, isContract = false, counter = function(){}) {
     if (!isValidHex(input)) throw new Error(ERRORS.invalidHex);
     input = isChecksum ? input : input.toLowerCase();
     var _wallet = getRandomWallet();
-    while (!isValidVanityWallet(_wallet, input, isChecksum, isContract)) _wallet = getRandomWallet(isChecksum);
+    while (!isValidVanityWallet(_wallet, input, isChecksum, isContract)) {
+        counter()
+        _wallet = getRandomWallet(isChecksum);
+    }
     if (isChecksum) _wallet.address = ethUtils.toChecksumAddress(_wallet.address);
     return _wallet;
 }

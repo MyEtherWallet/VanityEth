@@ -3,6 +3,7 @@
 var VanityEth = require('./libs/VanityEth');
 const ora = require('ora');
 var cluster = require('cluster')
+var TimeFormat = require('hh-mm-ss')
 var numCPUs = require('os').cpus().length
 var argv = require('yargs')
     .usage('Usage: $0 <command> [options]')
@@ -26,7 +27,7 @@ var argv = require('yargs')
     .describe('l', 'log output to file')
     .help('h')
     .alias('h', 'help')
-    .epilog('copyright 2017')
+    .epilog('copyright 2018')
     .argv;
 if (cluster.isMaster) {
     const args = {
@@ -48,6 +49,11 @@ if (cluster.isMaster) {
     }
     var walletsFound = 0;
     const spinner = ora('generating vanity address 1/' + args.numWallets).start();
+    let addps = 0;
+    setInterval(function(){
+        spinner.text ='Approximate ETA for an account ' + TimeFormat.fromS((Math.pow(16,20)/Math.pow(16,20-args.input.length))/addps, 'hh:mm:ss');
+        addps = 0;
+    },1000)
     for (var i = 0; i < numCPUs; i++) {
         const worker_env = {
             input: args.input,
@@ -56,21 +62,30 @@ if (cluster.isMaster) {
         }
         proc = cluster.fork(worker_env);
         proc.on('message', function(message) {
-            spinner.succeed(JSON.stringify(message));
-            if (args.log) logStream.write(JSON.stringify(message) + "\n");
-            walletsFound++;
-            if (walletsFound >= args.numWallets) {
-                cleanup();
+            if(message.account){
+                spinner.succeed(JSON.stringify(message));
+                if (args.log) logStream.write(JSON.stringify(message) + "\n");
+                    walletsFound++;
+                if (walletsFound >= args.numWallets) {
+                    cleanup();
+                }
+                spinner.text ='generating vanity address ' + (walletsFound + 1)  +'/' + args.numWallets;
+                spinner.start();
+            } else if(message.counter){
+                addps++
             }
-            spinner.text ='generating vanity address ' + (walletsFound + 1)  +'/' + args.numWallets;
-            spinner.start();
         });
     }
 
 } else {
     const worker_env = process.env;
     while (true) {
-        process.send(VanityEth.getVanityWallet(worker_env.input, worker_env.isChecksum == 'true', worker_env.isContract == 'true'))
+        process.send({
+            account: VanityEth.getVanityWallet(worker_env.input, worker_env.isChecksum == 'true', worker_env.isContract == 'true', function (){
+            process.send({
+                counter: true
+            })
+        })})
     }
 }
 process.stdin.resume();
