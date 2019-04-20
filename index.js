@@ -17,10 +17,12 @@ var argv = require('yargs')
     .alias('i', 'input')
     .string('i')
     .describe('i', 'input hex string')
+    .alias('p', 'pattern')
+    .number('p')
+    .describe('p', 'match with a pattern of repeated inputs N times (e.g.: "-i dead -p 2" would only match "0xdeaddead...")')
     .alias('c', 'checksum')
     .boolean('c')
     .describe('c', 'check against the checksum address')
-    .describe('i', 'input hex string')
     .string('create2')
     .describe('create2', 'contract address for contract deployment with create2 opcode')
     .alias('b', 'bytecode')
@@ -29,6 +31,8 @@ var argv = require('yargs')
     .alias('n', 'count')
     .number('n')
     .describe('n', 'number of wallets')
+    .boolean('inf')
+    .describe('inf', 'run the prgoram indefinitely')
     .boolean('contract')
     .describe('contract', 'contract address for contract deployment')
     .alias('l', 'log')
@@ -42,17 +46,23 @@ var argv = require('yargs')
 if (cluster.isMaster) {
     const args = {
         input: argv.input ? argv.input : '',
+        acceptPattern: argv.pattern ? argv.pattern : 1,
         isCreate2: argv.create2 ? true : false,
         create2Address: argv.create2,
         create2Bytecode: argv.create2 ? fs.readFileSync(argv.bytecode).toString('utf-8').trim() : '',
         isChecksum: argv.checksum ? true : false,
         numWallets: argv.count ? argv.count : 1,
+        runIndefinitely: argv.inf ? true : false,
         isContract: argv.contract ? true : false,
         log: argv.log ? true : false,
         logFname: argv.log ? 'VanityEth-log-' + Date.now() + '.txt' : ''
     }
     if (args.isContract && args.isCreate2) {
         console.error('Cannot use the options "--contract" and "--create2" at the same time');
+        process.exit(1);
+    }
+    if (args.numWallets > 1 && args.runIndefinitely) {
+        console.error('No point in using the "-n" flag and the "--inf" flag at the same time! :D');
         process.exit(1);
     }
     if (!VanityEth.isValidHex(args.input)) {
@@ -74,15 +84,26 @@ if (cluster.isMaster) {
         var logStream = fs.createWriteStream(args.logFname, { 'flags': 'a' });
     }
     var walletsFound = 0;
-    const spinner = ora('generating vanity address 1/' + args.numWallets).start();
+    var initialStatusText = 'generating vanity address 1';
+    if(!args.runIndefinitely) {
+        initialStatusText += '/' + args.numWallets;
+    }
+    console.log(initialStatusText);
+
+    const spinner = ora("Starting to mine your vanity addresses! \\m/").start();
+
     let addps = 0;
+    let elapsedSeconds = 0;
     setInterval(function(){
-        spinner.text ='Approximate ETA for an account ' + TimeFormat.fromS((Math.pow(16,20)/Math.pow(16,20-args.input.length))/addps, 'hh:mm:ss');
+        spinner.text ='Approximate ETA for an account ' + TimeFormat.fromS((Math.pow(16, 20) / Math.pow(16, 20 - args.input.length * args.acceptPattern))/addps - elapsedSeconds, 'hh:mm:ss');
         addps = 0;
+        elapsedSeconds++;
     },1000)
+
     for (var i = 0; i < numCPUs; i++) {
         const worker_env = {
             input: args.input,
+            acceptPattern: args.acceptPattern,
             isChecksum: args.isChecksum,
             isContract: args.isContract,
             isCreate2: args.isCreate2,
@@ -93,12 +114,17 @@ if (cluster.isMaster) {
         proc.on('message', function(message) {
             if(message.account){
                 spinner.succeed(JSON.stringify(message));
+                walletsFound++;
+                elapsedSeconds = 0;
                 if (args.log) logStream.write(JSON.stringify(message) + "\n");
-                    walletsFound++;
-                if (walletsFound >= args.numWallets) {
+                if (!args.runIndefinitely && walletsFound >= args.numWallets) {
                     cleanup();
                 }
-                spinner.text ='generating vanity address ' + (walletsFound + 1)  +'/' + args.numWallets;
+                var statusText = 'generating vanity address ' + (walletsFound + 1);
+                if(!args.runIndefinitely) {
+                    statusText += '/' + args.numWallets;
+                }
+                console.log(statusText);
                 spinner.start();
             } else if(message.counter){
                 addps++
@@ -111,7 +137,7 @@ if (cluster.isMaster) {
     if(worker_env.isCreate2) {
         while (true) {
             process.send({
-                account: VanityEth.getVanityCreate2Address(worker_env.input, worker_env.isChecksum == 'true', worker_env.create2Address, worker_env.create2Bytecode, function (){
+                account: VanityEth.getVanityCreate2Address(worker_env.input, worker_env.isChecksum == 'true', worker_env.create2Address, worker_env.create2Bytecode, worker_env.acceptPattern, function (){
                 process.send({
                     counter: true
                 })
@@ -120,7 +146,7 @@ if (cluster.isMaster) {
     } else {
         while (true) {
             process.send({
-                account: VanityEth.getVanityWallet(worker_env.input, worker_env.isChecksum == 'true', worker_env.isContract == 'true', function (){
+                account: VanityEth.getVanityWallet(worker_env.input, worker_env.isChecksum == 'true', worker_env.isContract == 'true', worker_env.acceptPattern, function (){
                 process.send({
                     counter: true
                 })

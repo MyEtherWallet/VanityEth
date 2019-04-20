@@ -40,11 +40,23 @@ var isValidVanityWallet = function(wallet, input, isChecksum, isContract) {
     _add = isChecksum ? ethUtils.toChecksumAddress(_add) : _add;
     return _add.substr(2, input.length) == input;
 }
-var getVanityWallet = function(input = '', isChecksum = false, isContract = false, ounter = function(){}) {
+function isValidVanityWalletPattern(wallet, input, isChecksum, isContract, multipleInputMatch) {
+    var _add = wallet.address;
+    var re = new RegExp(`0x^(${input}){${multipleInputMatch},}`, 'g');
+    if (isContract) {
+        var _contractAdd = getDeterministicContractAddress(_add);
+        _contractAdd = isChecksum ? ethUtils.toChecksumAddress(_contractAdd) : _contractAdd;
+        wallet.contract = _contractAdd;
+        return re.test(_contractAdd);
+    }
+    _add = isChecksum ? ethUtils.toChecksumAddress(_add) : _add;
+    return re.test(_add);
+}
+var getVanityWallet = function(input = '', isChecksum = false, isContract = false, multipleInputMatch = 1, ounter = function(){}) {
     if (!isValidHex(input)) throw new Error(ERRORS.invalidHex);
     input = isChecksum ? input : input.toLowerCase();
     var _wallet = getRandomWallet();
-    while (!isValidVanityWallet(_wallet, input, isChecksum, isContract)) {
+    while (multipleInputMatch ? !isValidVanityWalletPattern(_wallet, input, isChecksum, isContract, multipleInputMatch) : !isValidVanityWallet(_wallet, input, isChecksum, isContract)) {
         counter()
         _wallet = getRandomWallet();
     }
@@ -57,14 +69,21 @@ function isValidCreate2Address(wallet, input, creatorAddress, bytecode, isChecks
     wallet.address = _address;
     return _address.substr(2, input.length) == input
 }
-var getVanityCreate2Address = function(input = '', isChecksum = false, create2Address = '', create2Bytecode = '', counter = function(){}) {
+function isValidCreate2AddressPattern(wallet, input, creatorAddress, bytecode, isChecksum, multipleInputMatch) {
+    var _address = getCreate2ContractAddress(creatorAddress, wallet.saltHex, bytecode);
+    _address = isChecksum ? ethUtils.toChecksumAddress(_address) : _address;
+    wallet.address = _address;
+    var re = new RegExp(`^0x(${input}){${multipleInputMatch},}`, 'g');
+    return re.test(_address);
+}
+var getVanityCreate2Address = function(input = '', isChecksum = false, create2Address = '', create2Bytecode = '', multipleInputMatch = 1, counter = function(){}) {
     if (!isValidHex(input)) throw new Error(ERRORS.invalidHex);
     if (!ethUtils.isValidAddress(create2Address)) throw new Error(ERRORS.invalidAddress);
     if (!isValidBytecode(create2Bytecode)) throw new Error(ERRORS.invalidBytecode);
     input = isChecksum ? input : input.toLowerCase();
     var _wallet = {};
     _wallet.saltHex = getRandomSalt();
-    while (!isValidCreate2Address(_wallet, input, create2Address, create2Bytecode, isChecksum)) {
+    while (multipleInputMatch ? !isValidCreate2AddressPattern(_wallet, input, create2Address, create2Bytecode, isChecksum, multipleInputMatch) :  !isValidCreate2Address(_wallet, input, create2Address, create2Bytecode, isChecksum)) {
         counter()
         _wallet.saltHex = getRandomSalt();
     }
