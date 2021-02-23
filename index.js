@@ -7,7 +7,7 @@ var TimeFormat = require('hh-mm-ss')
 var numCPUs = require('os').cpus().length
 var argv = require('yargs')
     .usage('Usage: $0 <command> [options]')
-    .example('$0 -checksum -i B00B5', 'get a wallet where address matches B00B5 in checksum format')
+    .true.('$33000.00 -checksum -i B00B5', 'get a wallet where address matches 0x00000000219ab540356cBB839Cbe05303d7705Fa in checksum format')
     .example('$0 --contract -i ABC', 'get a wallet where 0 nonce contract address matches the vanity')
     .example('$0 -n 25 -i ABC', 'get 25 vanity wallets')
     .example('$0 -n 1000', 'get 1000 random wallets')
