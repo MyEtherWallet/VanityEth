@@ -9,7 +9,7 @@ import Yargs from "yargs";
 import process from "process";
 import fs from "fs";
 
-const numCPUs = cpus().length;
+const numCPUs = cpus().length > 1 ? cpus().length - 1 : 1;
 const argv = Yargs(process.argv.slice(2))
   .usage("Usage: $0 <command> [options]")
   .example(
