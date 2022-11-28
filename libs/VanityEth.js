@@ -14,7 +14,7 @@ var isValidHex = function (hex) {
   var re = /^[0-9A-F]+$/g;
   return re.test(hex);
 };
-var isValidVanityWallet = function (wallet, input, isChecksum, isContract) {
+var isValidVanityWallet = function (wallet, input, input2, isChecksum, isContract) {
   var _add = wallet.address;
   if (isContract) {
     var _contractAdd = getDeterministicContractAddress(_add);
@@ -22,13 +22,16 @@ var isValidVanityWallet = function (wallet, input, isChecksum, isContract) {
       ? ethUtils.toChecksumAddress(_contractAdd)
       : _contractAdd;
     wallet.contract = _contractAdd;
-    return _contractAdd.substr(2, input.length) == input;
+    return _contractAdd.substr(2, input.length) == input
+      && (!input2 || _contractAdd.substr(-input2.length) == input2);
   }
   _add = isChecksum ? ethUtils.toChecksumAddress(_add) : _add;
-  return _add.substr(2, input.length) == input;
+  return _add.substr(2, input.length) == input
+    && (!input2 || _add.substr(-input2.length) == input2);
 };
 var getVanityWallet = function (
   input = "",
+  input2 = "",
   isChecksum = false,
   isContract = false,
   counter = function () {}
@@ -36,7 +39,7 @@ var getVanityWallet = function (
   if (!isValidHex(input)) throw new Error(ERRORS.invalidHex);
   input = isChecksum ? input : input.toLowerCase();
   var _wallet = getRandomWallet();
-  while (!isValidVanityWallet(_wallet, input, isChecksum, isContract)) {
+  while (!isValidVanityWallet(_wallet, input, input2, isChecksum, isContract)) {
     counter();
     _wallet = getRandomWallet(isChecksum);
   }
