@@ -32,7 +32,9 @@
   },
   "homepage": "https://github.com/MyEtherWallet/VanityEth#readme",
   "dependencies": {
+    "bip39": "^3.1.0",
     "ethereumjs-util": "^7.0.9",
+    "ethereumjs-wallet": "^1.0.2",
     "hh-mm-ss": "^1.2.0",
     "ora": "^6.0.1",
     "yargs": "^17.2.1"

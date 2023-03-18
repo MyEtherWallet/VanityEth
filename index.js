@@ -33,6 +33,9 @@ const argv = Yargs(process.argv.slice(2))
   .describe("n", "number of wallets")
   .boolean("contract")
   .describe("contract", "contract address for contract deployment")
+  .alias("m", "mnemonic")
+  .boolean("m")
+  .describe("m", "generate mnemonic")
   .alias("l", "log")
   .boolean("l")
   .describe("l", "log output to file")
@@ -46,6 +49,7 @@ if (cluster.isMaster) {
     isChecksum: argv.checksum ? true : false,
     numWallets: argv.count ? argv.count : 1,
     isContract: argv.contract ? true : false,
+    isMnemonic: argv.mnemonic ? true : false,
     log: argv.log ? true : false,
     logFname: argv.log ? "VanityEth-log-" + Date.now() + ".txt" : "",
   };
@@ -75,6 +79,7 @@ if (cluster.isMaster) {
       input: args.input,
       isChecksum: args.isChecksum,
       isContract: args.isContract,
+      isMnemonic: args.isMnemonic,
     };
     const proc = cluster.fork(worker_env);
     proc.on("message", function (message) {
@@ -105,6 +110,7 @@ if (cluster.isMaster) {
           worker_env.input,
           worker_env.isChecksum == "true",
           worker_env.isContract == "true",
+          worker_env.isMnemonic == "true",
           function () {
             process.send({
               counter: true,
