@@ -31,17 +31,24 @@ var getVanityWallet = function (
   input = "",
   isChecksum = false,
   isContract = false,
-  counter = function () {}
+  maxTime = 0
 ) {
   if (!isValidHex(input)) throw new Error(ERRORS.invalidHex);
   input = isChecksum ? input : input.toLowerCase();
   var _wallet = getRandomWallet();
+  var now = (new Date()).getTime();
+  var startTime = now;
+  var loopCount = 0;
   while (!isValidVanityWallet(_wallet, input, isChecksum, isContract)) {
-    counter();
+    loopCount++;
     _wallet = getRandomWallet(isChecksum);
+    if(maxTime && loopCount % 10 === 0 && (new Date()).getTime() - startTime > maxTime) {
+      return [null, loopCount];
+    }
   }
+
   if (isChecksum) _wallet.address = ethUtils.toChecksumAddress(_wallet.address);
-  return _wallet;
+  return [ _wallet, loopCount ];
 };
 var getDeterministicContractAddress = function (address) {
   return (
