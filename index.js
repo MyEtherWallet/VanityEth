@@ -92,28 +92,30 @@ if (cluster.isMaster) {
           args.numWallets;
         spinner.start();
       } else if (message.counter) {
-        addps++;
+        addps += message.counter;
       }
     });
   }
 } else {
   const worker_env = process.env;
-  while (true) {
-    if (process.send) {
+  setInterval(function() {
+    var res = VanityEth.getVanityWallet(
+      worker_env.input,
+      worker_env.isChecksum == "true",
+      worker_env.isContract == "true",
+      1000
+    );
+    if(res[1] > 0) {
       process.send({
-        account: VanityEth.getVanityWallet(
-          worker_env.input,
-          worker_env.isChecksum == "true",
-          worker_env.isContract == "true",
-          function () {
-            process.send({
-              counter: true,
-            });
-          }
-        ),
+        counter: res[1],
       });
     }
-  }
+    if(res[0]) {
+      process.send({
+        account: res[0],
+      });
+    }
+  }, 10);
 }
 process.stdin.resume();
 const cleanup = function (options, err) {
