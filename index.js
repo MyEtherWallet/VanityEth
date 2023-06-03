@@ -115,7 +115,7 @@ if (cluster.isMaster) {
         account: res[0],
       });
     }
-  }, 1000);
+  }, 10);
 }
 process.stdin.resume();
 const cleanup = function (options, err) {
